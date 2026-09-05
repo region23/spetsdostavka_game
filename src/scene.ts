@@ -42,16 +42,16 @@ export class GameScene extends Phaser.Scene {
   preload() {
     this.load.on("progress", progress);
     this.load.on("loaderror", assetError);
-    this.load.image("city-distance", assetURL("city-distance.png"));
-    this.load.image("hall", assetURL("post-office.png"));
-    this.load.image("shaft", assetURL("service-hall.png"));
-    this.load.image("club", assetURL("small-hall.png"));
+    this.load.image("city-distance", assetURL("city-distance.webp"));
+    this.load.image("hall", assetURL("post-office.webp"));
+    this.load.image("shaft", assetURL("service-hall.webp"));
+    this.load.image("club", assetURL("small-hall.webp"));
     this.load.atlas(
       "courier",
       assetURL("courier-hd.png"),
       assetURL("courier-hd.json"),
     );
-    this.load.image("bag", assetURL("parcel-cutout.png"));
+    this.load.image("bag", assetURL("parcel-cutout.webp"));
   }
   create() {
     if (
@@ -62,7 +62,7 @@ export class GameScene extends Phaser.Scene {
       assetError();
       return;
     }
-    this.menuBagURL = assetURL("parcel-cutout.png");
+    this.menuBagURL = assetURL("parcel-cutout.webp");
     this.backdrop = new ParallaxBackdrop(this);
     this.train = this.add.graphics().setDepth(1);
     this.staticG = this.add.graphics().setDepth(3);

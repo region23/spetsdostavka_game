@@ -1,0 +1,157 @@
+/* Keep controls outside the world and respect browser bars / display cutouts. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+button, a, summary { touch-action: manipulation; }
+.touch-controls { display: none; }
+.keyboard-settings summary { cursor: pointer; padding: 10px 0; }
+body[data-touch="true"] { overscroll-behavior: none; }
+body[data-touch="true"] #app { height: 100dvh; }
+body[data-touch="true"] #game {
+  inset: calc(44px + var(--safe-top)) calc(108px + var(--safe-right)) calc(64px + var(--safe-bottom)) calc(108px + var(--safe-left));
+  touch-action: none;
+}
+body[data-touch="true"] #ui {
+  padding: max(12px, var(--safe-top)) max(16px, var(--safe-right)) max(12px, var(--safe-bottom)) max(16px, var(--safe-left));
+  backdrop-filter: none;
+}
+body[data-touch="true"][data-mode="menu"] #ui { padding: 0; }
+body[data-touch="true"] #ui.playing {
+  inset: 0;
+  width: 100%; height: 100%;
+  transform: none;
+  padding: 0;
+}
+body[data-touch="true"] .sheet,
+body[data-touch="true"] .intro-screen {
+  max-height: calc(100dvh - 24px - var(--safe-top) - var(--safe-bottom));
+  overscroll-behavior: contain;
+}
+body[data-touch="true"] .hud-top {
+  top: var(--safe-top); left: max(8px, var(--safe-left)); right: max(8px, var(--safe-right));
+  height: 44px; gap: 8px;
+}
+body[data-touch="true"] .hud-parcel {
+  min-width: 0; gap: 8px; padding: 4px 8px; border: 0; box-shadow: none;
+}
+body[data-touch="true"] .parcel-number { font-size: 16px; padding-right: 8px; white-space: nowrap; flex-shrink: 0; }
+body[data-touch="true"] .hud-parcel strong { font-size: 10px; letter-spacing: 0; }
+body[data-touch="true"] .hud-parcel small,
+body[data-touch="true"] .room-label small,
+body[data-touch="true"] .pause-button span,
+body[data-touch="true"] .control-list,
+body[data-touch="true"] .hud-bottom #context { display: none; }
+body[data-touch="true"] .seal-state { font-size: 18px; }
+body[data-touch="true"] .room-label { padding: 4px; min-width: 0; }
+body[data-touch="true"] .room-label strong { font-size: 12px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body[data-touch="true"] .pause-button { flex: 0 0 44px; height: 44px; padding: 5px; }
+body[data-touch="true"] .hud-bottom {
+  bottom: var(--safe-bottom); left: max(8px, var(--safe-left)); right: max(8px, var(--safe-right));
+  height: 56px; min-height: 0; padding: 6px 10px;
+}
+body[data-touch="true"] .hud-bottom:has(#subtitle:empty):not(:has(#toast.show)) {
+  background: transparent; border-color: transparent;
+}
+body[data-touch="true"] #subtitle,
+body[data-touch="true"] .hud-info #toast { font-size: 12px; line-height: 1.35; }
+body[data-touch="true"] .touch-controls { display: block; }
+.touch-move, .touch-actions {
+  position: absolute; bottom: calc(72px + var(--safe-bottom));
+  display: grid; grid-template-columns: repeat(2, 46px); gap: 6px;
+  pointer-events: auto;
+}
+.touch-move { left: max(8px, var(--safe-left)); }
+.touch-actions { right: max(8px, var(--safe-right)); }
+.touch-controls button {
+  padding: 4px 1px; height: 56px; border-radius: 10px;
+  background: #dedfcd; color: var(--ink); border: 1px solid #a8b4a1;
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  transition: none;
+}
+.touch-controls b { display: block; font-size: 24px; line-height: 28px; }
+.touch-controls span { display: block; font-size: 9px; line-height: 16px; }
+.touch-controls button.held { background: var(--ink); color: var(--paper); transform: translateY(1px); }
+.touch-controls button.available { border: 2px solid #678571; }
+.touch-controls button[aria-pressed="true"] { background: #b8cfb7; }
+.rotate-hint { display: none; }
+body[data-touch="true"] .ending-caption { top: 15%; left: 10%; right: 10%; padding: 20px; }
+body[data-touch="true"] .ending-caption h2 { font-size: 32px; margin: 10px 0; }
+body[data-touch="true"] .ending-caption p { font-size: 15px; }
+body[data-touch="true"] .ending-caption .text-button { margin-top: 0; }
+body[data-touch="true"] #toast { max-width: calc(100vw - 32px); }
+
+@media (max-width: 600px) {
+  #ui { padding: 12px; }
+  .sheet { padding: 22px; max-height: calc(100dvh - 24px); }
+  .sheet h2, .brief h2, .journal-sheet h2 { font-size: 30px; }
+  .sheet p, .brief .brief-task { font-size: 15px; }
+  .sheet > .text-button { margin-left: 0; display: block; }
+  .sheet > button.primary { min-width: 0; width: 100%; }
+  .brief-address { grid-template-columns: 86px 1fr; gap: 10px; }
+  .brief blockquote { padding: 14px; font-size: 17px; }
+  .settings-grid { grid-template-columns: 1fr; gap: 12px; }
+  .slider-label input { min-height: 30px; }
+  .toggle-label { min-height: 44px; }
+  .intro-screen { grid-template-columns: 1fr; max-height: calc(100dvh - 24px); }
+  .intro-art { min-height: 190px; }
+  .intro-art span { padding: 10px 16px; font-size: 12px; }
+  .intro-copy-panel { padding: 22px; }
+  .intro-copy-panel h2 { font-size: 29px; }
+  .intro-copy-panel > p { font-size: 15px; }
+  .intro-actions .primary { min-width: 0; }
+  .receipt > .emblem { display: none; }
+  .receipt h2 { font-size: 42px; }
+  .receipt-stamp { right: 22px; top: 100px; font-size: 16px; padding: 8px; }
+  .splash { padding: 30px; }
+  .splash strong { font-size: 23px; }
+  .menu { min-height: 0; height: 100%; overflow: auto; padding: 24px; }
+  .menu-copy { width: 100%; padding-top: 20px; }
+  .menu h1 { font-size: clamp(48px, 16vw, 80px); letter-spacing: -4px; }
+  .menu .tagline { font-size: 17px; }
+  .menu .intro-copy { max-width: 290px; }
+  .menu .large { width: 100%; min-width: 0; }
+  .menu-secondary { justify-content: space-between; gap: 10px; }
+  .menu .poster { left: auto; right: 0; top: 84px; width: 160px; height: 175px; opacity: 0.22; overflow: clip; }
+  .poster-number, .menu footer { display: none; }
+  .mission-mini { width: 100%; }
+  .rule-diagram { height: 170px; }
+  .diagram-field { left: 8px; width: 155px; height: 155px; }
+  .diagram-lift { right: 16px; width: 52px; }
+}
+
+@media (orientation: portrait) {
+  body[data-touch="true"] { --portrait-stage-top: max(calc(76px + var(--safe-top)), calc((100dvh - 50vw - 240px) / 2)); }
+  body[data-touch="true"] #game {
+    top: var(--portrait-stage-top); left: var(--safe-left); right: var(--safe-right);
+    bottom: auto; height: 50vw;
+  }
+  body[data-touch="true"] .hud-parcel strong { max-width: 122px; }
+  body[data-touch="true"] .hud-bottom {
+    top: calc(var(--portrait-stage-top) + 50vw + 8px); bottom: auto; height: auto; min-height: 72px;
+  }
+  .touch-move, .touch-actions { grid-template-columns: repeat(2, 58px); gap: 8px; bottom: calc(24px + var(--safe-bottom)); }
+  .touch-controls button { height: 64px; }
+  .touch-controls span { font-size: 10px; }
+  .touch-move { bottom: calc(56px + var(--safe-bottom)); left: max(16px, var(--safe-left)); }
+  .touch-actions { right: max(16px, var(--safe-right)); }
+  .rotate-hint { display: block; position: absolute; top: calc(42px + var(--safe-top)); left: 12px; right: 12px; text-align: center; font-size: 11px; margin: 5px 0; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  body[data-touch="true"] .menu { min-height: 0; overflow: auto; padding: 14px max(24px, var(--safe-right)) 16px max(24px, var(--safe-left)); }
+  body[data-touch="true"] .menu header { display: none; }
+  body[data-touch="true"] .menu-copy { padding-top: 0; width: 64%; }
+  body[data-touch="true"] .menu h1 { font-size: 51px; margin: 10px 0; letter-spacing: -3px; }
+  body[data-touch="true"] .tagline { margin-bottom: 8px; font-size: 15px; }
+  body[data-touch="true"] .intro-copy { margin: 8px 0; font-size: 12px; line-height: 1.4; }
+  body[data-touch="true"] .large { padding: 13px 16px; }
+  body[data-touch="true"] .mission-mini, body[data-touch="true"] .menu footer { display: none; }
+  body[data-touch="true"] .poster { top: 45px; bottom: 45px; left: 62%; }
+  body[data-touch="true"] .intro-art { min-height: 260px; }
+  body[data-touch="true"] .intro-copy-panel { padding: 20px; }
+  body[data-touch="true"] .intro-copy-panel > p { font-size: 15px; }
+  body[data-touch="true"] .sheet { padding: 22px; }
+}

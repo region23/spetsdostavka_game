@@ -47,7 +47,7 @@ try {
   await page.clock.install();
   await click("start");
   for (const name of ["intro-city", "intro-acceptance", "intro-delivery"]) {
-    assert.ok((await page.locator(".intro-art img").getAttribute("src")).endsWith(`${name}.png`));
+    assert.ok((await page.locator(".intro-art img").getAttribute("src")).endsWith(`${name}.webp`));
     await page.locator(".intro-art img").evaluate(img => img.decode());
     await page.screenshot({ path: `output/visual-${name}.png` });
     await click("intro-next");

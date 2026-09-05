@@ -9,7 +9,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --import tsx --test tests/*.test.ts",
     "test:route": "node --import tsx tests/route.ts",
-    "test:browser": "node tests/browser-route.mjs && node tests/browser-recovery.mjs && node tests/browser-narrative.mjs && node tests/browser-visuals.mjs"
+    "test:browser": "node tests/browser-route.mjs && node tests/browser-recovery.mjs && node tests/browser-narrative.mjs && node tests/browser-visuals.mjs",
+    "test:mobile": "node tests/browser-mobile.mjs && TOUCH=1 node tests/browser-route.mjs"
   },
   "dependencies": {
     "phaser": "4.0.0"

@@ -112,7 +112,7 @@ try {
   await denied.close();
   console.log("PASS denied storage and blocked audio do not block game");
   const missing = await browser.newPage();
-  await missing.route("**/assets/post-office.png", (route) => route.abort());
+  await missing.route("**/assets/post-office.webp", (route) => route.abort());
   await missing.goto("http://127.0.0.1:5173/");
   await missing.locator("[data-action=reload]").waitFor();
   assert.match(

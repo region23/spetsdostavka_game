@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import "./style.css";
+import "./mobile.css";
 import { assetURL } from "./assets";
 import { Simulation, STEP, RADIUS, PW, PH, type Input } from "./simulation";
 import { rooms, validateRooms } from "./rooms";
@@ -13,6 +14,7 @@ import { AudioController } from "./audio";
 import { GameScene } from "./scene";
 import { NarrativeController } from "./narrative";
 import { INTRO_VERSION, introPages, loreNotes } from "./lore";
+import { TouchInput, touchControls, touchDevice } from "./touch";
 const narrative = new NarrativeController();
 export const store = new CheckpointService();
 export const settings = store.settings();
@@ -33,6 +35,7 @@ const ui = document.querySelector<HTMLElement>("#ui")!;
 const toastEl = document.querySelector<HTMLElement>("#toast")!;
 const held = new Set<string>();
 const pressed = new Set<string>();
+const touch = new TouchInput(ui, () => mode === "game", () => { void sound.unlock(); });
 const bound = (
   set: Set<string>,
   action: keyof typeof DEFAULT_KEYS,
@@ -79,6 +82,7 @@ export function persist(completed = false) {
 }
 function setMode(next: string) {
   mode = next;
+  touch.clear();
   held.clear();
   pressed.clear();
   accumulator = 0;
@@ -102,6 +106,7 @@ export function ready() {
   }, 1050);
 }
 export function assetError() {
+  touch.clear();
   mode = "error";
   renderUI();
 }
@@ -162,7 +167,11 @@ export function pause() {
   }
 }
 const controls = () =>
-  `<div class="control-list"><span><kbd>${keyLabel(settings.keys.left)}</kbd><kbd>${keyLabel(settings.keys.right)}</kbd> движение</span><span><kbd>${keyLabel(settings.keys.jump)}</kbd> прыжок</span><span><kbd>${keyLabel(settings.keys.interact)}</kbd> посылка</span><span><kbd>${keyLabel(settings.keys.seal)}</kbd> пломба</span></div>`;
+  `<div class="control-list"><span><kbd>${keyLabel(settings.keys.left)}</kbd><kbd>${keyLabel(settings.keys.right)}</kbd> движение</span><span><kbd>${controlLabel("jump")}</kbd> прыжок</span><span><kbd>${controlLabel("interact")}</kbd> посылка</span><span><kbd>${controlLabel("seal")}</kbd> пломба</span></div>`;
+const controlLabel = (action: "jump" | "down" | "interact" | "seal") => touchDevice
+  ? { jump: "Прыжок", down: "Спуск", interact: "Посылка", seal: "Пломба" }[action]
+  : keyLabel(settings.keys[action]);
+const roomTip = () => sim.room.tip.replaceAll(" E", touchDevice ? ' кнопку «Посылка»' : ` ${controlLabel("interact")}`);
 function settingsHTML() {
   const labels = {
     master: "Общая громкость",
@@ -197,7 +206,7 @@ function settingsHTML() {
     )
     .join(
       "",
-    )}</section><section><div class="eyebrow">КЛАВИАТУРА</div>${Object.entries(
+    )}</section><section>${touchDevice ? '<p class="fine">Экранные кнопки: удерживайте стрелку для движения, другой рукой нажимайте действие. Поворот телефона ставит игру на паузу.</p>' : ""}<details class="keyboard-settings" ${touchDevice ? "" : "open"}><summary>Клавиатура</summary>${Object.entries(
     actions,
   )
     .map(
@@ -206,7 +215,7 @@ function settingsHTML() {
     )
     .join(
       "",
-    )}<p class="fine">Стрелки также работают. Esc — пауза, R — повтор, F2 — отладка.</p>${button("reset-keys", "По умолчанию", "text-button")}${document.fullscreenEnabled ? button("fullscreen", "⛶ Полный экран", "text-button") : ""}</section></div>${button("back", "Готово", "primary")}</div>`;
+    )}<p class="fine">Стрелки также работают. Esc — пауза, R — повтор, F2 — отладка.</p>${button("reset-keys", "По умолчанию", "text-button")}</details>${document.fullscreenEnabled ? button("fullscreen", "⛶ Полный экран", "text-button") : ""}</section></div>${button("back", "Готово", "primary")}</div>`;
 }
 function introHTML() {
   const page = introPages[introPage];
@@ -228,7 +237,7 @@ function renderUI() {
       ui.innerHTML = `<div class="sheet"><div class="eyebrow">МАРШРУТ НЕДОСТУПЕН</div><h2>Не удалось загрузить материалы</h2><p>Проверьте соединение и попробуйте ещё раз.</p>${button("reload", "Повторить загрузку", "primary")}</div>`;
       break;
     case "unsupported":
-      ui.innerHTML = `<div class="sheet">${smallBrand}<h2>Эта доставка — для компьютера</h2><p>Откройте игру на компьютере с клавиатурой. Для маршрута нужны клавиши движения, прыжка и пломбы.</p></div>`;
+      ui.innerHTML = `<div class="sheet">${smallBrand}<h2>Браузер не поддерживает игру</h2><p>Попробуйте открыть ссылку в актуальной версии Safari или Chrome.</p></div>`;
       break;
     case "splash":
       ui.innerHTML = `<button class="splash" data-action="splash">${emblem}<strong>СПЕЦДОСТАВКА</strong><span>Люди не должны терять связь</span></button>`;
@@ -244,10 +253,10 @@ function renderUI() {
       ui.innerHTML = journalHTML();
       break;
     case "brief":
-      ui.innerHTML = `<div class="brief sheet"><div class="eyebrow">ЗАДАНИЕ КУРЬЕРУ · №12-Б</div><h2>Перерыв для Малого зала</h2><blockquote>«У нас сегодня первый концерт. Автоматика перекрикивает даже пианино. Нам нужны пять минут».<cite>Заявка жителей из Малого зала</cite></blockquote><div class="brief-address"><span>КУДА НЕСТИ</span><strong>Малый зал Главпочтамта</strong><span>ЧТО ВНУТРИ</span><strong>Модуль с новым расписанием</strong></div><p class="brief-task">Установите модуль в приёмный узел у двери зала. Он разрешит остановить объявления и сортировку на пять минут.</p><div class="rule-note"><b>Ⅱ</b><p>Пока идёте, открывайте пломбу клавишей <kbd>${keyLabel(settings.keys.seal)}</kbd>. Она останавливает почтовые машины рядом с посылкой. Закроете пломбу, и они продолжат работу.</p></div>${button("accept", "Принять доставку →", "primary")}${button("menu", "В меню", "text-button")}</div>`;
+      ui.innerHTML = `<div class="brief sheet"><div class="eyebrow">ЗАДАНИЕ КУРЬЕРУ · №12-Б</div><h2>Перерыв для Малого зала</h2><blockquote>«У нас сегодня первый концерт. Автоматика перекрикивает даже пианино. Нам нужны пять минут».<cite>Заявка жителей из Малого зала</cite></blockquote><div class="brief-address"><span>КУДА НЕСТИ</span><strong>Малый зал Главпочтамта</strong><span>ЧТО ВНУТРИ</span><strong>Модуль с новым расписанием</strong></div><p class="brief-task">Установите модуль в приёмный узел у двери зала. Он разрешит остановить объявления и сортировку на пять минут.</p><div class="rule-note"><b>Ⅱ</b><p>Пока идёте, открывайте пломбу ${touchDevice ? "кнопкой" : "клавишей"} <kbd>${controlLabel("seal")}</kbd>. Она останавливает почтовые машины рядом с посылкой. Закроете пломбу, и они продолжат работу.</p></div>${button("accept", "Принять доставку →", "primary")}${button("menu", "В меню", "text-button")}</div>`;
       break;
     case "game":
-      ui.innerHTML = `<div class="hud-top"><div class="hud-parcel"><span class="parcel-number">12-Б</span><div><small>СПЕЦДОСТАВКА</small><strong id="hud-state">ПЛОМБА ЗАКРЫТА</strong></div><span class="seal-state" id="seal-icon">▶</span></div><div class="room-label"><small id="room-number"></small><strong id="room-title"></strong></div><button class="pause-button" data-action="pause" aria-label="Пауза">Ⅱ <span>ESC</span></button></div><div id="chapter-intro"></div><div class="hud-bottom"><div class="hud-info">${controls()}<div id="subtitle" role="status"></div></div><div id="context"></div></div>`;
+      ui.innerHTML = `<div class="hud-top"><div class="hud-parcel"><span class="parcel-number">12-Б</span><div><small>СПЕЦДОСТАВКА</small><strong id="hud-state">ПЛОМБА ЗАКРЫТА</strong></div><span class="seal-state" id="seal-icon">▶</span></div><div class="room-label"><small id="room-number"></small><strong id="room-title"></strong></div><button class="pause-button" data-action="pause" aria-label="Пауза">Ⅱ <span>ESC</span></button></div><div id="chapter-intro"></div><div class="hud-bottom"><div class="hud-info">${controls()}<div id="subtitle" role="status"></div></div><div id="context"></div></div>${touchDevice ? touchControls() : ""}`;
       updateHUD();
       break;
     case "pause":
@@ -258,7 +267,7 @@ function renderUI() {
       ui.innerHTML = `<div class="sheet"><div class="eyebrow">БЕЗОПАСНАЯ ТОЧКА</div><h2>Повторить комнату?</h2><p>Герой, посылка и механизмы вернутся к началу текущей комнаты. Предыдущие комнаты уже пройдены.</p>${button("confirm-restart", "Повторить", "primary")}${button("cancel-restart", "Назад", "text-button")}</div>`;
       break;
     case "help":
-      ui.innerHTML = `<div class="sheet help-sheet"><div class="eyebrow">ПАМЯТКА КУРЬЕРА</div><h2>Как работает пломба</h2><div class="rule-diagram"><div class="diagram-field"><span>12-Б</span><b>Ⅱ</b><i>Ⅱ</i></div><div class="diagram-lift">↑<small>ДВИЖЕТСЯ</small></div></div><p>${sim.room.tip.replaceAll(" E", ` ${keyLabel(settings.keys.interact)}`)}</p><p class="fine">${keyLabel(settings.keys.seal)} — переключить пломбу. ${keyLabel(settings.keys.interact)} — оставить или забрать груз. Поле действует и через стену. Висите на краю? ${keyLabel(settings.keys.jump)} — подняться, ${keyLabel(settings.keys.down)} — отпустить.</p>${button("resume", "Вернуться на маршрут", "primary")}${button("skip", "Пропустить препятствие", "text-button")}<p class="fine">Вы продолжите со следующей комнаты вместе с посылкой.</p></div>`;
+      ui.innerHTML = `<div class="sheet help-sheet"><div class="eyebrow">ПАМЯТКА КУРЬЕРА</div><h2>Как работает пломба</h2><div class="rule-diagram"><div class="diagram-field"><span>12-Б</span><b>Ⅱ</b><i>Ⅱ</i></div><div class="diagram-lift">↑<small>ДВИЖЕТСЯ</small></div></div><p>${roomTip()}</p><p class="fine">${controlLabel("seal")} — переключить пломбу. ${controlLabel("interact")} — оставить или забрать груз. Поле действует и через стену. Висите на краю? ${controlLabel("jump")} — подняться, ${controlLabel("down")} — отпустить.</p>${button("resume", "Вернуться на маршрут", "primary")}${button("skip", "Пропустить препятствие", "text-button")}<p class="fine">Вы продолжите со следующей комнаты вместе с посылкой.</p></div>`;
       break;
     case "settings":
       ui.innerHTML = settingsHTML();
@@ -311,15 +320,31 @@ function updateHUD() {
     .querySelector(".hud-parcel")
     ?.classList.toggle("active", sim.parcel.open);
   const a = sim.action();
+  const parcelButton = ui.querySelector<HTMLButtonElement>('[data-control="interact"]');
+  if (parcelButton) {
+    const label = a?.text || "Посылка";
+    const shortLabel = a
+      ? ({ pickup: "Взять", put: "Оставить", send: "Передать", recall: "Вернуть", deliver: "Вручить" }[a.kind] || "Посылка")
+      : "Посылка";
+    const text = parcelButton.querySelector("span")!;
+    if (text.textContent !== shortLabel) text.textContent = shortLabel;
+    if (parcelButton.getAttribute("aria-label") !== label) parcelButton.setAttribute("aria-label", label);
+    parcelButton.classList.toggle("available", !!a);
+  }
+  const sealButton = ui.querySelector<HTMLButtonElement>('[data-control="seal"]');
+  if (sealButton?.getAttribute("aria-pressed") !== String(sim.parcel.open)) {
+    sealButton?.setAttribute("aria-pressed", String(sim.parcel.open));
+    sealButton?.setAttribute("aria-label", sim.parcel.open ? "Закрыть пломбу" : "Открыть пломбу");
+  }
   const context = document.querySelector("#context");
   if (context) {
     let text = "";
     if (sim.player.hang)
-      text = `<kbd>${keyLabel(settings.keys.jump)}</kbd> Подняться · <kbd>${keyLabel(settings.keys.down)}</kbd> Спуститься`;
+      text = `<kbd>${controlLabel("jump")}</kbd> Подняться · <kbd>${controlLabel("down")}</kbd> Спуститься`;
     else if (a && a.kind !== "put")
-      text = `<kbd>${keyLabel(settings.keys.interact)}</kbd> ${a.text}`;
+      text = `<kbd>${controlLabel("interact")}</kbd> ${a.text}`;
     else if (settings.hints && sim.nearParcel())
-      text = `<kbd>${keyLabel(settings.keys.seal)}</kbd> ${sim.parcel.open ? "Закрыть" : "Открыть"} пломбу${!sim.parcel.carried ? " у посылки" : ""}`;
+      text = `<kbd>${controlLabel("seal")}</kbd> ${sim.parcel.open ? "Закрыть" : "Открыть"} пломбу${!sim.parcel.carried ? " у посылки" : ""}`;
     if (context.innerHTML !== text) context.innerHTML = text;
   }
   const sub = document.querySelector("#subtitle");
@@ -327,14 +352,11 @@ function updateHUD() {
     let text = "";
     if (settings.subtitles && narrative.subtitle) text = narrative.subtitle;
     else if (settings.hints && sim.roomTime > 25)
-      text = sim.room.tip.replaceAll(
-        " E",
-        ` ${keyLabel(settings.keys.interact)}`,
-      );
+      text = roomTip();
     else if (settings.hints && sim.roomIndex === 0 && sim.roomTime < 20)
       text = sim.flags.accepted
-        ? `${keyLabel(settings.keys.seal)}: откройте пломбу рядом с линией. Она действует на почтовые машины со знаком Ⅱ.`
-        : `${keyLabel(settings.keys.left)} / ${keyLabel(settings.keys.right)}: движение. ${keyLabel(settings.keys.jump)}: перепрыгнуть разрыв.`;
+        ? `${controlLabel("seal")}: откройте пломбу рядом с линией. Она действует на почтовые машины со знаком Ⅱ.`
+        : touchDevice ? "Удерживайте ← / → для движения. Прыжок: перепрыгнуть разрыв." : `${keyLabel(settings.keys.left)} / ${keyLabel(settings.keys.right)}: движение. ${controlLabel("jump")}: перепрыгнуть разрыв.`;
     if (sub.textContent !== text) sub.textContent = text;
   }
 }
@@ -343,6 +365,7 @@ ui.addEventListener("click", (event) => {
     "button",
   );
   if (!target) return;
+  if (target.dataset.control) return;
   void sound.unlock();
   sound.effect("click");
   if (target.dataset.bind) {
@@ -529,12 +552,19 @@ window.addEventListener("keydown", (e) => {
   held.add(e.code);
 });
 window.addEventListener("keyup", (e) => held.delete(e.code));
-window.addEventListener("blur", pause);
+window.addEventListener("blur", () => { touch.clear(); pause(); });
+let portrait = innerHeight > innerWidth;
+window.addEventListener("resize", () => {
+  const nextPortrait = innerHeight > innerWidth;
+  if (touchDevice && nextPortrait !== portrait) { touch.clear(); pause(); }
+  portrait = nextPortrait;
+});
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) pause();
 });
 window.addEventListener("pagehide", () => {
-  if (mode === "game") persist();
+  touch.clear();
+  pause();
 });
 export function frame(delta: number) {
   const dt = Math.min(delta / 1000, 0.1);
@@ -543,13 +573,14 @@ export function frame(delta: number) {
   if (mode === "game") {
     accumulator += dt;
     while (accumulator >= STEP) {
+      const tapped = touch.consume();
       const input: Input = {
-        left: bound(held, "left", "ArrowLeft"),
-        right: bound(held, "right", "ArrowRight"),
-        down: bound(pressed, "down", "ArrowDown"),
-        jump: pressed.has(settings.keys.jump),
-        interact: pressed.has(settings.keys.interact),
-        seal: pressed.has(settings.keys.seal),
+        left: bound(held, "left", "ArrowLeft") || touch.held("left"),
+        right: bound(held, "right", "ArrowRight") || touch.held("right"),
+        down: bound(pressed, "down", "ArrowDown") || tapped.has("down"),
+        jump: pressed.has(settings.keys.jump) || tapped.has("jump"),
+        interact: pressed.has(settings.keys.interact) || tapped.has("interact"),
+        seal: pressed.has(settings.keys.seal) || tapped.has("seal"),
       };
       pressed.clear();
       sim.step(input);
@@ -578,7 +609,7 @@ export function frame(delta: number) {
             "Посылка на другой стороне. До левого подъёмника её поле не достаёт.",
           );
         if (event === "fall" && sim.deaths % 3 === 0)
-          toast("Нужна подсказка? Esc → Помощь. Можно пропустить препятствие.");
+          toast("Нужна подсказка? Пауза → Помощь. Можно пропустить препятствие.");
         if (event === "delivered") {
           persist(true);
           endingTime = 0;
@@ -620,10 +651,7 @@ renderUI();
 const testCanvas = document.createElement("canvas");
 const supported = !!testCanvas.getContext("2d");
 export const scene = new GameScene();
-if (
-  !supported ||
-  (matchMedia("(pointer: coarse)").matches && innerWidth < 900)
-) {
+if (!supported) {
   mode = "unsupported";
   renderUI();
 } else
@@ -631,7 +659,7 @@ if (
     type: Phaser.CANVAS,
     parent: "game",
     width: 1280,
-    height: 720,
+    height: touchDevice ? 640 : 720,
     backgroundColor: "#e8e4d8",
     render: { antialias: true, roundPixels: false },
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
@@ -639,6 +667,14 @@ if (
     banner: false,
     audio: { noAudio: true },
   });
+// The game parent changes size independently of the viewport in the mobile
+// layout. Refresh FIT after CSS and browser toolbars have settled.
+new ResizeObserver(() => {
+  if (scene.scale) {
+    scene.scale.getParentBounds();
+    scene.scale.refresh();
+  }
+}).observe(document.querySelector("#game")!);
 // Read-only diagnostics for reproducible browser checks; no level-skip hooks in production.
 if (import.meta.env.DEV)
   Object.defineProperty(window, "__spets", {

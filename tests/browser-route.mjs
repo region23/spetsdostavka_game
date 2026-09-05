@@ -1,12 +1,17 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
+import { touchDriver } from "./touch-driver.mjs";
+const mobile = process.env.TOUCH === "1";
 const browser = await chromium.launch({
   executablePath:
     process.env.CHROMIUM_PATH ||
     "/Users/pavlenko/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing",
   headless: true,
 });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const page = await browser.newPage(mobile
+  ? { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
+  : { viewport: { width: 1440, height: 900 } });
+const touch = mobile ? await touchDriver(page) : null;
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 let keys = new Set();
@@ -16,6 +21,14 @@ const read = async () => {
   return state;
 };
 async function input(newKeys = []) {
+  if (touch) {
+    const map = { a: "left", d: "right", Space: "jump", s: "down", e: "interact", f: "seal" };
+    await touch.input(newKeys.map(key => {
+      if (!map[key]) throw new Error(`Unmapped route action: ${key}`);
+      return map[key];
+    }));
+    return;
+  }
   const next = new Set(newKeys);
   for (const k of keys) if (!next.has(k)) await page.keyboard.up(k);
   for (const k of next) if (!keys.has(k)) await page.keyboard.down(k);
@@ -165,7 +178,7 @@ try {
   );
   assert.deepEqual(errors, []);
   console.log(
-    "PASS: keyboard route, all six rooms, ending, persisted completion. Browser:",
+    `${mobile ? "Touch" : "Keyboard"} route: all six rooms, ending, persisted completion. Browser:`,
     browser.version(),
   );
 } catch (e) {

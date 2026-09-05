@@ -144,5 +144,43 @@
       "license": "Apache-2.0",
       "scope": "build tooling"
     }
-  ]
+  ],
+  "deliveryVariants": {
+    "preparation": "../../scripts/prepare-web-assets.mjs",
+    "format": "WebP, quality 0.88; maximum width 1280, parcel 640; preserve original PNG sources",
+    "files": [
+      {
+        "file": "post-office.webp",
+        "source": "post-office.png"
+      },
+      {
+        "file": "service-hall.webp",
+        "source": "service-hall.png"
+      },
+      {
+        "file": "small-hall.webp",
+        "source": "small-hall.png"
+      },
+      {
+        "file": "city-distance.webp",
+        "source": "city-distance.png"
+      },
+      {
+        "file": "intro-city.webp",
+        "source": "intro-city.png"
+      },
+      {
+        "file": "intro-acceptance.webp",
+        "source": "intro-acceptance.png"
+      },
+      {
+        "file": "intro-delivery.webp",
+        "source": "intro-delivery.png"
+      },
+      {
+        "file": "parcel-cutout.webp",
+        "source": "parcel-cutout.png"
+      }
+    ]
+  }
 }

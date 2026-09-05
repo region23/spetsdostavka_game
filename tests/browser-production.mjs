@@ -1,12 +1,17 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
+import { touchDriver } from "./touch-driver.mjs";
+const mobile = process.env.TOUCH === "1";
 const browser = await chromium.launch({
   executablePath:
     process.env.CHROMIUM_PATH ||
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
 });
-const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const page = await browser.newPage(mobile
+  ? { viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 }
+  : { viewport: { width: 1280, height: 720 } });
+const touch = mobile ? await touchDriver(page) : null;
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
 page.on("response", response => {
@@ -35,26 +40,28 @@ try {
   }
   await page.locator("[data-action=accept]").click();
   for (let i = 0; i < 5; i++) {
-    await page.keyboard.press("Escape");
+    if (mobile) await page.locator("[data-action=pause]").tap();
+    else await page.keyboard.press("Escape");
     await page.locator("[data-action=help]").click();
     await page.locator("[data-action=skip]").click();
     await page.clock.runFor(100);
   }
   assert.equal(await page.locator("#room-title").innerText(), "Малый зал");
-  await page.keyboard.down("d");
+  if (touch) await touch.input(["right"]);
+  else await page.keyboard.down("d");
   for (let i = 0; i < 65; i++) {
     await page.clock.runFor(100);
     if ((await page.locator("#context").innerText()).includes("Установить"))
       break;
   }
-  await page.keyboard.up("d");
-  await page.keyboard.press("e");
+  if (touch) { await touch.input([]); await touch.input(["interact"]); }
+  else { await page.keyboard.up("d"); await page.keyboard.press("e"); }
   await page.clock.runFor(12000);
   await page.locator(".receipt").waitFor();
   await page.screenshot({ path: "output/production-receipt.png" });
   assert.deepEqual(errors, []);
   console.log(
-    "PASS production build: assets, menus, help, delivery, receipt, no debug API. Browser:",
+    `PASS ${mobile ? "touch" : "desktop"} production build: assets, menus, help, delivery, receipt, no debug API. Browser:`,
     browser.version(),
   );
 } finally {
