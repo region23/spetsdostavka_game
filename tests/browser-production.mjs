@@ -59,6 +59,13 @@ try {
   await page.clock.runFor(12000);
   await page.locator(".receipt").waitFor();
   await page.screenshot({ path: "output/production-receipt.png" });
+  if (mobile) for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }]) {
+    await page.setViewportSize(viewport);
+    await page.screenshot({ path: `output/mobile-production-receipt-${viewport.width}.png` });
+    const title = await page.locator(".receipt h2").boundingBox();
+    const stamp = await page.locator(".receipt-stamp").boundingBox();
+    assert.ok(stamp.y >= title.y + title.height || stamp.x >= title.x + title.width, "Receipt stamp overlaps heading on phone");
+  }
   assert.deepEqual(errors, []);
   console.log(
     `PASS ${mobile ? "touch" : "desktop"} production build: assets, menus, help, delivery, receipt, no debug API. Browser:`,
