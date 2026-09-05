@@ -26,3 +26,9 @@ Use case: stylized-concept. Asset type: background-only environment for final ro
 
 Use case: background-extraction. Edit target: this exact courier sprite sheet. Change ONLY the checkerboard background to a genuinely transparent background with alpha. Keep all eight courier figures, their exact pixel placement, size, clothing, colors, poses and outlines unchanged. Do not redraw the characters. Do not draw any white or gray checkerboard. If actual alpha is unavailable, use a perfectly solid pure white #ffffff background, no pattern, no shadows. Preserve exact dimensions and sprite layout.
 
+
+## Обновление иллюстраций и параллакса
+
+Сюжетные иллюстрации для трёх карточек и отдельный дальний город: [полные промпты](visual-refresh-prompts.md). Все четыре изображения созданы встроенным `image_gen`.
+
+Попытка исправить атлас генератором убрала фрагмент руки, но изменила размер и потеряла альфа-канал. Она не используется в игре. Итоговый `courier-clean.png` подготовлен из прежнего RGBA-атласа скриптом `scripts/prepare-courier.mjs`: сохраняется связный силуэт каждого кадра, удаляется попавшая в кадр падения рука соседнего персонажа. Семь остальных кадров, размеры и привязка ступней сохранены без изменений.

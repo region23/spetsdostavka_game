@@ -1,5 +1,6 @@
 import * as Phaser from "phaser";
 import { assetURL } from "./assets";
+import { ParallaxBackdrop } from "./parallax";
 import {
   sim,
   mode,
@@ -21,7 +22,7 @@ const C = {
   teal: 0x608c7c,
 };
 export class GameScene extends Phaser.Scene {
-  bg!: Phaser.GameObjects.Image;
+  backdrop!: ParallaxBackdrop;
   staticG!: Phaser.GameObjects.Graphics;
   dynamicG!: Phaser.GameObjects.Graphics;
   fieldG!: Phaser.GameObjects.Graphics;
@@ -41,19 +42,20 @@ export class GameScene extends Phaser.Scene {
   preload() {
     this.load.on("progress", progress);
     this.load.on("loaderror", assetError);
+    this.load.image("city-distance", assetURL("city-distance.png"));
     this.load.image("hall", assetURL("post-office.png"));
     this.load.image("shaft", assetURL("service-hall.png"));
     this.load.image("club", assetURL("small-hall.png"));
     this.load.atlas(
       "courier",
-      assetURL("courier-ready.png"),
-      assetURL("courier-ready.json"),
+      assetURL("courier-clean.png"),
+      assetURL("courier-clean.json"),
     );
     this.load.image("bag", assetURL("parcel-cutout.png"));
   }
   create() {
     if (
-      !["hall", "shaft", "club", "courier", "bag"].every((k) =>
+      !["hall", "shaft", "club", "courier", "bag", "city-distance"].every((k) =>
         this.textures.exists(k),
       )
     ) {
@@ -61,10 +63,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
     this.menuBagURL = assetURL("parcel-cutout.png");
-    this.bg = this.add
-      .image(640, 360, "hall")
-      .setDisplaySize(1280, 720)
-      .setDepth(0);
+    this.backdrop = new ParallaxBackdrop(this);
     this.train = this.add.graphics().setDepth(1);
     this.staticG = this.add.graphics().setDepth(3);
     this.fieldG = this.add.graphics().setDepth(5);
@@ -110,7 +109,7 @@ export class GameScene extends Phaser.Scene {
     this.labels = [];
     for (const t of this.machineLabels) t.destroy();
     this.machineLabels = [];
-    this.bg.setTexture(sim.room.family);
+    this.backdrop.setRoom(sim.room.family, sim.player.x, settings.reducedMotion);
     const g = this.staticG;
     g.clear();
     // Structural platform faces are separate from the painted rear architecture.
@@ -227,6 +226,7 @@ export class GameScene extends Phaser.Scene {
     frame(delta);
     if (!this.dynamicG) return;
     if (this.room !== sim.roomIndex) this.rebuild();
+    this.backdrop.update(sim.player.x, delta, mode === "game", settings.reducedMotion);
     const p = sim.player,
       g = this.dynamicG,
       field = this.fieldG;

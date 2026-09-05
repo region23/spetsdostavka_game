@@ -32,7 +32,7 @@
     },
     {
       "file": "courier-ready.png",
-      "role": "RGBA courier sprite atlas, 8 frames at 96×120; origin feet-center",
+      "role": "Previous RGBA atlas with an overlapping fall crop; retained as preparation source",
       "metadata": "courier-ready.json",
       "source": "courier.png",
       "prompt": 2,
@@ -56,6 +56,33 @@
       "file": "parcel.png",
       "role": "Original generated satchel illustration; not loaded by game",
       "prompt": 3
+    },
+    {
+      "file": "intro-city.png",
+      "role": "Story illustration: everyday life in Prospekt",
+      "prompt": "../../docs/visual-refresh-prompts.md#intro-citypng"
+    },
+    {
+      "file": "intro-acceptance.png",
+      "role": "Story illustration: obsolete city plan and changing life",
+      "prompt": "../../docs/visual-refresh-prompts.md#intro-acceptancepng"
+    },
+    {
+      "file": "intro-delivery.png",
+      "role": "Story illustration: physical schedule delivery to concert hall",
+      "prompt": "../../docs/visual-refresh-prompts.md#intro-deliverypng"
+    },
+    {
+      "file": "city-distance.png",
+      "role": "Separate distant city plane behind the hall window mask",
+      "prompt": "../../docs/visual-refresh-prompts.md#city-distancepng"
+    },
+    {
+      "file": "courier-clean.png",
+      "metadata": "courier-clean.json",
+      "role": "Production RGBA courier atlas, 8 frames at 96×120",
+      "source": "courier-ready.png",
+      "preparation": "../../scripts/prepare-courier.mjs; preserve connected silhouette within each crop; remove 86 detached neighboring-hand pixels from fall frame; other seven frames unchanged"
     }
   ],
   "preparation": "Generated RGB sources were prepared as game textures with frame extraction, consistent feet anchors and cream-background chroma key, then exported from the game canvas as RGBA PNG. Final sprite PNG files contain an alpha channel. Original sources are preserved.",
