@@ -1,0 +1,101 @@
+import { chromium } from "playwright";
+import assert from "node:assert/strict";
+const browser = await chromium.launch({
+  executablePath: process.env.CHROMIUM_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  headless: true,
+});
+const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+const errors = [];
+page.on("pageerror", error => errors.push(error.message));
+const click = action => page.locator(`[data-action=${action}]`).click();
+const mode = () => page.evaluate(() => window.__spets.mode);
+try {
+  // A player who saw the old briefing must still receive the new introduction.
+  await page.addInitScript(() => localStorage.setItem("spets-story", "true"));
+  await page.goto("http://127.0.0.1:5173/");
+  await page.locator("[data-action=start]").waitFor();
+  await page.screenshot({ path: "output/narrative-menu.png" });
+  await page.clock.install();
+  await click("start");
+  assert.equal(await mode(), "intro");
+  await page.clock.runFor(20000);
+  assert.equal(await page.locator("h2").innerText(), "Город Проспект");
+  assert.equal(await page.evaluate(() => window.__spets.elapsed), 0);
+  await page.locator(".intro-art img").evaluate(img => img.decode());
+  await page.screenshot({ path: "output/narrative-intro-1.png" });
+  await page.keyboard.press("ArrowRight");
+  assert.match(await page.locator("h2").innerText(), /Приёмке/);
+  await page.locator(".intro-art img").evaluate(img => img.decode());
+  await page.screenshot({ path: "output/narrative-intro-2.png" });
+  await click("intro-back");
+  assert.equal(await page.locator("h2").innerText(), "Город Проспект");
+  await click("intro-next");
+  await click("intro-next");
+  await page.locator(".intro-art img").evaluate(img => img.decode());
+  await page.screenshot({ path: "output/narrative-intro-3.png" });
+  await page.setViewportSize({ width: 960, height: 720 });
+  await page.locator(".intro-art img").evaluate(img => img.decode());
+  await page.screenshot({ path: "output/narrative-intro-960.png" });
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+  await click("intro-next");
+  assert.equal(await mode(), "brief");
+  await page.screenshot({ path: "output/narrative-brief-960.png" });
+  await click("accept");
+  await page.clock.runFor(100);
+  await page.keyboard.press("Escape");
+  await click("journal");
+  assert.equal(await page.locator(".journal-notes article").count(), 3);
+  const paused = await page.evaluate(() => window.__spets.elapsed);
+  await page.clock.runFor(20000);
+  assert.equal(await page.evaluate(() => window.__spets.elapsed), paused);
+  await page.screenshot({ path: "output/narrative-journal.png" });
+  await page.keyboard.press("Escape");
+  assert.equal(await mode(), "pause");
+  await click("help");
+  await click("skip");
+  await page.clock.runFor(3000);
+  assert.match(await page.locator("#subtitle").innerText(), /Перерыв отклонён/);
+  assert.equal(await page.locator(".hud-bottom #subtitle").count(), 1);
+  const subtitleBox = await page.locator("#subtitle").boundingBox();
+  const footerBox = await page.locator(".hud-bottom").boundingBox();
+  assert.ok(subtitleBox.y >= footerBox.y);
+  await page.screenshot({ path: "output/narrative-footer-960.png" });
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.screenshot({ path: "output/narrative-footer.png" });
+  await page.keyboard.press("Escape");
+  await click("journal");
+  assert.equal(await page.locator(".journal-notes article").count(), 4);
+  await page.locator(".journal-transcript summary").click();
+  assert.match(await page.locator(".journal-transcript").innerText(), /Перерыв отклонён/);
+  await page.keyboard.press("Escape");
+  await click("menu");
+  const saved = await page.evaluate(() => localStorage.getItem("spets-save"));
+  await click("city");
+  await click("intro-skip");
+  assert.equal(await mode(), "menu");
+  assert.equal(await page.evaluate(() => localStorage.getItem("spets-save")), saved);
+  // Model a legacy checkpoint with no onboarding marker or narrative history.
+  await page.evaluate(() => {
+    localStorage.removeItem("spets-intro");
+    const save = JSON.parse(localStorage.getItem("spets-save"));
+    delete save.narrative;
+    localStorage.setItem("spets-save", JSON.stringify(save));
+  });
+  await page.reload();
+  await page.locator("[data-action=continue]").waitFor();
+  await click("continue");
+  assert.equal(await mode(), "intro");
+  await click("intro-skip");
+  assert.equal(await mode(), "game");
+  assert.equal(await page.evaluate(() => window.__spets.state.room), 1);
+  await page.clock.runFor(3000);
+  assert.match(await page.locator("#subtitle").innerText(), /Перерыв отклонён/);
+  await page.keyboard.press("Escape");
+  await click("menu");
+  await click("continue");
+  assert.equal(await mode(), "game");
+  assert.deepEqual(errors, []);
+  console.log("PASS onboarding, manual reading, skip/back/replay, legacy saves, progressive journal, transcript, footer, 1280/960 layouts");
+} finally {
+  await browser.close();
+}

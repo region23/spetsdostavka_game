@@ -1,0 +1,71 @@
+{
+  "source": "courier.png",
+  "frameSize": { "width": 96, "height": 120 },
+  "scale": 0.21,
+  "frames": {
+    "idle": {
+      "x": 96,
+      "y": 84,
+      "w": 148,
+      "h": 472,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "run1": {
+      "x": 294,
+      "y": 134,
+      "w": 312,
+      "h": 422,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "run2": {
+      "x": 650,
+      "y": 130,
+      "w": 247,
+      "h": 426,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "run3": {
+      "x": 902,
+      "y": 132,
+      "w": 302,
+      "h": 424,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "jump": {
+      "x": 55,
+      "y": 652,
+      "w": 290,
+      "h": 330,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "fall": {
+      "x": 271,
+      "y": 731,
+      "w": 378,
+      "h": 378,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "hang": {
+      "x": 680,
+      "y": 613,
+      "w": 120,
+      "h": 508,
+      "anchorX": 0.5,
+      "anchorY": 1
+    },
+    "interact": {
+      "x": 894,
+      "y": 702,
+      "w": 288,
+      "h": 416,
+      "anchorX": 0.5,
+      "anchorY": 1
+    }
+  }
+}

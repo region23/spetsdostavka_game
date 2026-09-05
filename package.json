@@ -1,0 +1,23 @@
+{
+  "name": "spetsdostavka",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "test:route": "node --import tsx tests/route.ts",
+    "test:browser": "node tests/browser-route.mjs && node tests/browser-recovery.mjs && node tests/browser-narrative.mjs"
+  },
+  "dependencies": {
+    "phaser": "4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "tsx": "4.20.5",
+    "typescript": "5.9.2",
+    "vite": "6.4.3"
+  }
+}

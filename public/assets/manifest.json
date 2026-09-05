@@ -1,0 +1,109 @@
+{
+  "project": "Спецдоставка — Посылка №12-Б. Перерыв",
+  "created": "2026-09-05",
+  "generation": {
+    "tool": "OpenAI built-in image_gen",
+    "fallbackCLI": false,
+    "prompts": "../../docs/asset-prompts.md",
+    "author": "OpenAI image generator, directed by Codex for Pavel",
+    "usage": "Generated for this user project. No third-party photos or externally sourced artwork were used. No claim of exclusive rights in generated imagery is made."
+  },
+  "assets": [
+    {
+      "file": "post-office.png",
+      "role": "Main post office background; no playable objects",
+      "prompt": 1
+    },
+    {
+      "file": "service-hall.png",
+      "role": "Service shaft background; no playable objects",
+      "prompt": 4
+    },
+    {
+      "file": "small-hall.png",
+      "role": "Club gallery and rehearsal-room background",
+      "prompt": 5
+    },
+    {
+      "file": "parcel-cutout.png",
+      "role": "RGBA satchel, used in menu and attached to independent parcel anchor",
+      "source": "parcel.png",
+      "prompt": 3
+    },
+    {
+      "file": "courier-ready.png",
+      "role": "RGBA courier sprite atlas, 8 frames at 96×120; origin feet-center",
+      "metadata": "courier-ready.json",
+      "source": "courier.png",
+      "prompt": 2,
+      "editPrompt": 6
+    },
+    {
+      "file": "courier-source.png",
+      "role": "Original generated sprite reference; not loaded by game",
+      "prompt": 2
+    },
+    {
+      "file": "courier.png",
+      "role": "Generator background-extraction result; retained as source, not loaded by game",
+      "prompt": 6
+    },
+    {
+      "file": "courier-atlas.json",
+      "role": "Source crop coordinates used for production texture preparation"
+    },
+    {
+      "file": "parcel.png",
+      "role": "Original generated satchel illustration; not loaded by game",
+      "prompt": 3
+    }
+  ],
+  "preparation": "Generated RGB sources were prepared as game textures with frame extraction, consistent feet anchors and cream-background chroma key, then exported from the game canvas as RGBA PNG. Final sprite PNG files contain an alpha channel. Original sources are preserved.",
+  "proceduralAssets": {
+    "author": "Codex for this project",
+    "items": [
+      "mechanism bodies and rails",
+      "collision-aligned platform tiles",
+      "seal state icons and field",
+      "winged envelope vector emblem",
+      "UI",
+      "Web Audio music and effects"
+    ],
+    "usage": "Original project source assets; no stock content dependencies."
+  },
+  "fonts": {
+    "family": "Arial / Helvetica / Georgia / system sans-serif",
+    "distribution": "System fonts are referenced, not embedded or redistributed.",
+    "cyrillic": true
+  },
+  "audio": {
+    "implementation": "Original Web Audio synthesis in src/audio.ts",
+    "materials": [
+      "menu arpeggio",
+      "machine ambience",
+      "final piano-like phrase",
+      "24 short effect definitions"
+    ],
+    "voices": "Optional device-provided Russian speech synthesis. No voice recordings are bundled."
+  },
+  "thirdParty": [
+    {
+      "name": "Phaser",
+      "version": "4.0.0",
+      "license": "MIT",
+      "notice": "../licenses/Phaser-MIT.txt"
+    },
+    {
+      "name": "Vite",
+      "version": "6.4.3",
+      "license": "MIT",
+      "scope": "build tooling"
+    },
+    {
+      "name": "TypeScript",
+      "version": "5.9.2",
+      "license": "Apache-2.0",
+      "scope": "build tooling"
+    }
+  ]
+}
