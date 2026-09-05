@@ -18,9 +18,12 @@ try {
   await page.clock.install();
   await page.clock.runFor(1200);
   for (const [width, height, safe] of [[852, 286, 0], [852, 286, 44], [844, 390, 0], [667, 275, 0], [390, 844, 0], [320, 568, 0]]) {
+    const before = page.viewportSize();
     await page.setViewportSize({ width, height });
     await page.addStyleTag({ content: `:root { --safe-left: ${safe}px; --safe-right: ${safe}px; }` });
     await page.clock.runFor(100);
+    if ((before.width < before.height) !== (width < height))
+      await expect(page.locator("body")).toHaveAttribute("data-mode", "pause");
     if (await page.locator("[data-action=resume]").isVisible()) await page.locator("[data-action=resume]").click();
     await page.clock.runFor(300);
     await page.screenshot({ path: `output/mobile-layout-${width}-${height}-${safe}.png` });
