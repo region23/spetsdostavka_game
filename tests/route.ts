@@ -1,5 +1,5 @@
 import { Simulation, type Input } from "../src/simulation";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 const s = new Simulation();
 const replay: Input[] = [];
 const tick = (input: Input = {}) => {
@@ -115,4 +115,5 @@ stop();
 tick({ interact: true });
 if (!s.completed) throw Error("Not delivered");
 console.log("DELIVERED", s.elapsed, s.deaths, replay.length);
+mkdirSync("output", { recursive: true });
 writeFileSync("output/replay.json", JSON.stringify(replay));
