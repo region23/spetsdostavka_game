@@ -1,4 +1,4 @@
-/* Keep controls outside the world and respect browser bars / display cutouts. */
+/* Controls and messages share a bottom dock; the camera fills the stage. */
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -11,7 +11,7 @@ button, a, summary { touch-action: manipulation; }
 body[data-touch="true"] { overscroll-behavior: none; }
 body[data-touch="true"] #app { height: 100dvh; }
 body[data-touch="true"] #game {
-  inset: calc(44px + var(--safe-top)) calc(108px + var(--safe-right)) calc(64px + var(--safe-bottom)) calc(108px + var(--safe-left));
+  inset: calc(44px + var(--safe-top)) var(--safe-right) calc(76px + var(--safe-bottom)) var(--safe-left);
   touch-action: none;
 }
 body[data-touch="true"] #ui {
@@ -49,9 +49,11 @@ body[data-touch="true"] .room-label { padding: 4px; min-width: 0; }
 body[data-touch="true"] .room-label strong { font-size: 12px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 body[data-touch="true"] .pause-button { flex: 0 0 44px; height: 44px; padding: 5px; }
 body[data-touch="true"] .hud-bottom {
-  bottom: var(--safe-bottom); left: max(8px, var(--safe-left)); right: max(8px, var(--safe-right));
-  height: 56px; min-height: 0; padding: 6px 10px;
+  bottom: calc(6px + var(--safe-bottom)); left: calc(120px + var(--safe-left)); right: calc(228px + var(--safe-right));
+  height: 64px; min-height: 0; padding: 6px 10px;
+  overflow: auto; overscroll-behavior: contain; pointer-events: auto; align-items: flex-start;
 }
+body[data-touch="true"] .hud-bottom .hud-info { margin-block: auto; }
 body[data-touch="true"] .hud-bottom:has(#subtitle:empty):not(:has(#toast.show)) {
   background: transparent; border-color: transparent;
 }
@@ -59,12 +61,12 @@ body[data-touch="true"] #subtitle,
 body[data-touch="true"] .hud-info #toast { font-size: 12px; line-height: 1.35; }
 body[data-touch="true"] .touch-controls { display: block; }
 .touch-move, .touch-actions {
-  position: absolute; bottom: calc(72px + var(--safe-bottom));
-  display: grid; grid-template-columns: repeat(2, 46px); gap: 6px;
+  position: absolute; bottom: calc(10px + var(--safe-bottom));
+  display: grid; grid-template-columns: repeat(2, 48px); gap: 6px;
   pointer-events: auto;
 }
-.touch-move { left: max(8px, var(--safe-left)); }
-.touch-actions { right: max(8px, var(--safe-right)); }
+.touch-move { left: calc(8px + var(--safe-left)); }
+.touch-actions { right: calc(8px + var(--safe-right)); grid-template-columns: repeat(4, 48px); }
 .touch-controls button {
   padding: 4px 1px; height: 56px; border-radius: 10px;
   background: #dedfcd; color: var(--ink); border: 1px solid #a8b4a1;
@@ -123,14 +125,15 @@ body[data-touch="true"] #toast { max-width: calc(100vw - 32px); }
 }
 
 @media (orientation: portrait) {
-  body[data-touch="true"] { --portrait-stage-top: max(calc(76px + var(--safe-top)), calc((100dvh - 50vw - 240px) / 2)); }
+  body[data-touch="true"] { --portrait-stage-top: calc(70px + var(--safe-top)); --portrait-stage-height: calc(100dvh - 330px - var(--safe-top) - var(--safe-bottom)); }
   body[data-touch="true"] #game {
     top: var(--portrait-stage-top); left: var(--safe-left); right: var(--safe-right);
-    bottom: auto; height: 50vw;
+    bottom: auto; height: var(--portrait-stage-height);
   }
   body[data-touch="true"] .hud-parcel strong { max-width: 122px; }
   body[data-touch="true"] .hud-bottom {
-    top: calc(var(--portrait-stage-top) + 50vw + 8px); bottom: auto; height: auto; min-height: 72px;
+    top: calc(var(--portrait-stage-top) + var(--portrait-stage-height) + 8px); bottom: auto;
+    left: 8px; right: 8px; height: 84px; min-height: 0;
   }
   .touch-move, .touch-actions { grid-template-columns: repeat(2, 58px); gap: 8px; bottom: calc(24px + var(--safe-bottom)); }
   .touch-controls button { height: 64px; }

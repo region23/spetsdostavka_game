@@ -20,8 +20,7 @@ async function checkControls() {
   await expect.poll(async () => {
     const parent = await page.locator("#game").boundingBox();
     const canvas = await page.locator("#game canvas").boundingBox();
-    const scale = Math.min(parent.width / 1280, parent.height / 640);
-    return Math.abs(canvas.width - 1280 * scale) + Math.abs(canvas.height - 640 * scale);
+    return Math.abs(canvas.width - parent.width) + Math.abs(canvas.height - parent.height);
   }).toBeLessThan(2);
   const world = await page.locator("#game canvas").boundingBox();
   const viewport = page.viewportSize();

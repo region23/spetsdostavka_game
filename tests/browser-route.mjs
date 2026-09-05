@@ -9,7 +9,7 @@ const browser = await chromium.launch({
   headless: true,
 });
 const page = await browser.newPage(mobile
-  ? { viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
+  ? { viewport: { width: Number(process.env.PHONE_WIDTH || 852), height: Number(process.env.PHONE_HEIGHT || 286) }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
   : { viewport: { width: 1440, height: 900 } });
 const touch = mobile ? await touchDriver(page) : null;
 const errors = [];
@@ -17,7 +17,13 @@ page.on("pageerror", (e) => errors.push(e.message));
 let keys = new Set();
 let state;
 const read = async () => {
-  state = await page.evaluate(() => window.__spets.state);
+  const snapshot = await page.evaluate(() => window.__spets);
+  state = snapshot.state;
+  if (mobile && snapshot.mode === "game" && state.player.y <= 640) {
+    const v = snapshot.view, p = state.player;
+    assert.ok(p.x >= v.x && p.x <= v.x + v.width, "Camera lost the courier horizontally");
+    assert.ok(p.y - 96 >= v.y - 1 && p.y <= v.y + v.height + 1, "Camera lost the courier on a jump or lift");
+  }
   return state;
 };
 async function input(newKeys = []) {

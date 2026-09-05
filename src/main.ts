@@ -670,5 +670,11 @@ if (!supported) {
 // Read-only diagnostics for reproducible browser checks; no level-skip hooks in production.
 if (import.meta.env.DEV)
   Object.defineProperty(window, "__spets", {
-    get: () => ({ mode, state: sim.snapshot(), elapsed: sim.elapsed }),
+    get: () => {
+      const camera = scene.cameras?.main;
+      return { mode, state: sim.snapshot(), elapsed: sim.elapsed, view: camera && {
+        x: camera.scrollX, y: camera.scrollY,
+        width: camera.width / camera.zoom, height: camera.height / camera.zoom,
+      } };
+    },
   });

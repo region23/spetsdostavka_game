@@ -25,6 +25,7 @@ const C = {
 };
 export class GameScene extends Phaser.Scene {
   backdrop!: ParallaxBackdrop;
+  positionCamera!: (x: number, y: number) => void;
   staticG!: Phaser.GameObjects.Graphics;
   dynamicG!: Phaser.GameObjects.Graphics;
   fieldG!: Phaser.GameObjects.Graphics;
@@ -56,7 +57,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("bag", assetURL("parcel-cutout.webp"));
   }
   create() {
-    installDisplaySizing(this, touchDevice);
+    this.positionCamera = installDisplaySizing(this, touchDevice);
     if (
       !["hall", "shaft", "club", "courier", "bag", "city-distance"].every((k) =>
         this.textures.exists(k),
@@ -264,6 +265,7 @@ export class GameScene extends Phaser.Scene {
       this.textures.get("courier").has(pose) ? pose : "idle",
     );
     this.hero.setPosition(p.x, p.y + 1).setFlipX(p.face < 0);
+    this.positionCamera(p.x, p.y);
     this.bag
       .setPosition(sim.parcel.x, sim.parcel.y + 4)
       .setAngle(
