@@ -16,6 +16,15 @@ try {
   await page.goto(process.env.GAME_URL || "http://127.0.0.1:4173/");
   await page.locator("[data-action=start]").waitFor();
   assert.equal(await page.evaluate(() => typeof window.__spets), "undefined");
+  await page.locator("[data-action=about]").click();
+  for (const url of ["https://t.me/pavlenkodev", "https://github.com/region23/spetsdostavka_game"]) {
+    const link = page.locator(`.project-links a[href="${url}"]`);
+    assert.ok(await link.isVisible());
+    assert.equal(await link.getAttribute("target"), "_blank");
+    assert.match(await link.getAttribute("rel"), /noopener/);
+  }
+  await page.screenshot({ path: "output/production-about.png" });
+  await page.locator("[data-action=menu]").click();
   await page.clock.install();
   await page.locator("[data-action=start]").click();
   if (await page.locator("[data-action=intro-next]").isVisible()) {

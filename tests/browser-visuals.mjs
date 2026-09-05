@@ -1,5 +1,7 @@
 import { chromium } from "playwright";
 import assert from "node:assert/strict";
+import { mkdirSync } from "node:fs";
+mkdirSync("output", { recursive: true });
 const browser = await chromium.launch({
   executablePath: process.env.CHROMIUM_PATH || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
@@ -35,6 +37,13 @@ try {
   const menu = await page.locator(".menu").innerText();
   for (const text of ["КОМПЬЮТЕР", "ПРОСПЕКТ, ГЛАВПОЧТАМТ", "ПЕРВАЯ ДОСТАВКА", "ОТПРАВЛЕНИЕ В МАЛЫЙ ЗАЛ"])
     assert.ok(!menu.includes(text));
+  await click("about");
+  assert.equal(await page.locator(".project-links a").count(), 2);
+  await page.screenshot({ path: "output/about-links.png" });
+  await page.setViewportSize({ width: 960, height: 720 });
+  await page.screenshot({ path: "output/about-links-960.png" });
+  await click("menu");
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.clock.install();
   await click("start");
   for (const name of ["intro-city", "intro-acceptance", "intro-delivery"]) {
@@ -71,19 +80,50 @@ try {
   await page.keyboard.up("a");
   await page.clock.runFor(100);
   assert.deepEqual(await layers(), reduced);
-  // Render every real atlas frame on a light background, enlarged for inspection.
-  await page.evaluate(async () => {
-    const img = new Image(); img.src = "/assets/courier-clean.png"; await img.decode();
-    const canvas = document.createElement("canvas"); canvas.width = 1536; canvas.height = 280;
-    const ctx = canvas.getContext("2d"); ctx.fillStyle = "#eee8d8"; ctx.fillRect(0, 0, 1536, 280);
-    ctx.imageSmoothingEnabled = false;
-    for (let i = 0; i < 8; i++) {
-      ctx.drawImage(img, i * 96, 0, 96, 120, i * 192, 20, 192, 240);
-      ctx.fillStyle = "#253b3c"; ctx.fillText(["idle", "run1", "run2", "run3", "jump", "fall", "hang", "interact"][i], i * 192 + 70, 275);
-    }
+  // Inspect all production frames at 2× display size against light and dark.
+  const atlasCheck = await page.evaluate(async () => {
+    const img = new Image(); img.src = "/assets/courier-hd.png"; await img.decode();
+    const atlas = await (await fetch("/assets/courier-hd.json")).json();
+    const canvas = document.createElement("canvas"); canvas.width = 1536; canvas.height = 560;
+    const ctx = canvas.getContext("2d");
+    const source = document.createElement("canvas"); source.width = img.width; source.height = img.height;
+    const sourceCtx = source.getContext("2d"); sourceCtx.drawImage(img, 0, 0);
+    const frames = Object.entries(atlas.frames);
+    const checks = frames.map(([name, { frame: f }]) => {
+      const rgba = sourceCtx.getImageData(f.x, f.y, f.w, f.h).data;
+      let pixels = 0, edgePixels = 0, coloredFringe = 0, whiteFringe = 0;
+      for (let i = 0; i < rgba.length; i += 4) {
+        if (!rgba[i + 3]) continue;
+        pixels++;
+        if (rgba[i + 3] < 240) {
+          edgePixels++;
+          if (rgba[i + 1] - Math.max(rgba[i], rgba[i + 2]) > 30) coloredFringe++;
+          if (Math.min(rgba[i], rgba[i + 1], rgba[i + 2]) > 220) whiteFringe++;
+        }
+      }
+      return { name, width: f.w, height: f.h, pixels, edgePixels, coloredFringe, whiteFringe };
+    });
+    ["#eee8d8", "#15242a"].forEach((background, row) => {
+      ctx.fillStyle = background; ctx.fillRect(0, row * 280, 1536, 280);
+      frames.forEach(([name, { frame: f }], i) => {
+        ctx.drawImage(img, f.x, f.y, f.w, f.h, i * 192, row * 280 + 20, 192, 240);
+        ctx.fillStyle = row ? "#eee8d8" : "#253b3c"; ctx.fillText(name, i * 192 + 70, row * 280 + 275);
+      });
+    });
     document.body.replaceChildren(canvas); canvas.id = "atlas-check";
+    return checks;
   });
+  await page.setViewportSize({ width: 1536, height: 560 });
   await page.locator("#atlas-check").screenshot({ path: "output/courier-frames.png" });
+  for (const frame of atlasCheck) {
+    assert.equal(frame.width, 288);
+    assert.equal(frame.height, 360);
+    assert.ok(frame.pixels > 10000 && frame.edgePixels > 100, JSON.stringify(frame));
+    assert.equal(frame.coloredFringe, 0, JSON.stringify(frame));
+    // Allow isolated white shirt/cuff pixels; a matte halo lights a large
+    // fraction of the silhouette, not a single clothing detail.
+    assert.ok(frame.whiteFringe / frame.edgePixels < 0.005, JSON.stringify(frame));
+  }
   assert.deepEqual(errors, []);
   console.log("PASS menu cleanup, distinct story art, layered motion, pause, reduced motion, sprite frame render");
 } finally {

@@ -48,8 +48,8 @@ export class GameScene extends Phaser.Scene {
     this.load.image("club", assetURL("small-hall.png"));
     this.load.atlas(
       "courier",
-      assetURL("courier-clean.png"),
-      assetURL("courier-clean.json"),
+      assetURL("courier-hd.png"),
+      assetURL("courier-hd.json"),
     );
     this.load.image("bag", assetURL("parcel-cutout.png"));
   }
@@ -71,6 +71,7 @@ export class GameScene extends Phaser.Scene {
     this.hero = this.add
       .image(120, 610, "courier", "idle")
       .setOrigin(0.5, 1)
+      .setScale(1 / 3)
       .setDepth(8);
     this.bag = this.add
       .image(100, 567, "bag")

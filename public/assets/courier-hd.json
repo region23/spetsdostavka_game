@@ -1,0 +1,205 @@
+{
+  "frames": {
+    "idle": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "run1": {
+      "frame": {
+        "x": 288,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "run2": {
+      "frame": {
+        "x": 576,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "run3": {
+      "frame": {
+        "x": 864,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "jump": {
+      "frame": {
+        "x": 1152,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "fall": {
+      "frame": {
+        "x": 1440,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "hang": {
+      "frame": {
+        "x": 1728,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    },
+    "interact": {
+      "frame": {
+        "x": 2016,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 288,
+        "h": 360
+      },
+      "sourceSize": {
+        "w": 288,
+        "h": 360
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 1
+      }
+    }
+  },
+  "meta": {
+    "image": "courier-hd.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 2304,
+      "h": 360
+    },
+    "scale": "1"
+  }
+}

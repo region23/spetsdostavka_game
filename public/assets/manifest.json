@@ -80,9 +80,21 @@
     {
       "file": "courier-clean.png",
       "metadata": "courier-clean.json",
-      "role": "Production RGBA courier atlas, 8 frames at 96×120",
+      "role": "Previous RGBA courier atlas, 8 frames at 96×120; retained as historical source",
       "source": "courier-ready.png",
       "preparation": "../../scripts/prepare-courier.mjs; preserve connected silhouette within each crop; remove 86 detached neighboring-hand pixels from fall frame; other seven frames unchanged"
+    },
+    {
+      "file": "courier-hd-source.png",
+      "role": "Refined courier artwork on green matte; generated from courier-source.png, not loaded at runtime",
+      "prompt": "../../docs/asset-prompts.md#курьер-в-повышенном-разрешении"
+    },
+    {
+      "file": "courier-hd.png",
+      "metadata": "courier-hd.json",
+      "role": "Production RGBA courier atlas: eight 288×360 frames, displayed at one-third scale",
+      "source": "courier-hd-source.png",
+      "preparation": "../../scripts/prepare-courier-hd.mjs; green matte extraction, edge color decontamination, connected silhouette extraction and shared scale/feet baseline"
     }
   ],
   "preparation": "Generated RGB sources were prepared as game textures with frame extraction, consistent feet anchors and cream-background chroma key, then exported from the game canvas as RGBA PNG. Final sprite PNG files contain an alpha channel. Original sources are preserved.",

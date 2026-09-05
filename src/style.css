@@ -40,9 +40,32 @@ button:hover {
 button:active {
   transform: translateY(1px);
 }
-button:focus-visible {
+button:focus-visible,
+a:focus-visible {
   outline: 3px solid #b6462e;
   outline-offset: 5px;
+}
+.project-links {
+  display: grid;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 20px 0;
+  border-block: 1px solid var(--line);
+}
+.project-links a {
+  display: grid;
+  gap: 5px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.project-links a:hover strong {
+  color: var(--red);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.project-links span {
+  font-size: 13px;
+  line-height: 1.4;
 }
 button.primary {
   background: var(--ink);
