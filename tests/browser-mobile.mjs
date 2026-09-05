@@ -28,11 +28,11 @@ async function checkControls() {
     const b = await button.boundingBox();
     assert.ok(b.width >= 44 && b.height >= 44);
     assert.ok(b.x >= 0 && b.y >= 0 && b.x + b.width <= viewport.width && b.y + b.height <= viewport.height);
-    assert.ok(b.x + b.width <= world.x || b.x >= world.x + world.width || b.y >= world.y + world.height || b.y + b.height <= world.y,
-      `Button overlaps game: ${await button.getAttribute("data-control")}`);
+    assert.ok(b.x >= world.x && b.y >= world.y && b.x + b.width <= world.x + world.width + 1 && b.y + b.height <= world.y + world.height + 1,
+      `Button must overlay game: ${await button.getAttribute("data-control")}`);
   }
   const footer = await page.locator(".hud-bottom").boundingBox();
-  assert.ok(footer.y >= world.y + world.height - 1, `Messages must stay below the world: ${JSON.stringify({ viewport, world, footer })}`);
+  assert.ok(footer.y + footer.height <= viewport.height, "Bottom message must stay on screen");
   assert.ok(await page.locator("#subtitle").evaluate(el => el.scrollHeight <= el.parentElement.clientHeight));
 }
 try {

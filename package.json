@@ -10,7 +10,7 @@
     "test": "node --import tsx --test tests/*.test.ts",
     "test:route": "node --import tsx tests/route.ts",
     "test:browser": "node tests/browser-route.mjs && node tests/browser-recovery.mjs && node tests/browser-narrative.mjs && node tests/browser-visuals.mjs && node tests/browser-sharpness.mjs",
-    "test:mobile": "node tests/browser-mobile.mjs && node tests/browser-mobile-layout.mjs && TOUCH=1 node tests/browser-route.mjs"
+    "test:mobile": "node tests/browser-mobile.mjs && node tests/browser-mobile-layout.mjs && node tests/browser-fullscreen.mjs && TOUCH=1 node tests/browser-route.mjs"
   },
   "dependencies": {
     "phaser": "4.0.0"

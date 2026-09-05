@@ -15,7 +15,9 @@ import { GameScene } from "./scene";
 import { NarrativeController } from "./narrative";
 import { INTRO_VERSION, introPages, loreNotes } from "./lore";
 import { TouchInput, touchControls, touchDevice } from "./touch";
+import { isStandalone, toggleFullscreen, isAppleMobile } from "./fullscreen";
 const narrative = new NarrativeController();
+let fullscreenReturn = "menu";
 export const store = new CheckpointService();
 export const settings = store.settings();
 export const sound = new AudioController(settings);
@@ -58,6 +60,8 @@ export const keyLabel = (key: string) =>
 const emblem = `<svg class="emblem" viewBox="0 0 96 52" aria-hidden="true"><path d="M29 16h38v25H29zM29 17l19 14 19-14M29 24H11L1 13h28M29 33H17l-8-8M67 24h18l10-11H67M67 33h12l8-8"/></svg>`;
 const button = (id: string, text: string, cls = "") =>
   `<button data-action="${id}" class="${cls}">${text}</button>`;
+const screenButton = (compact = false) => isStandalone() && !document.fullscreenElement ? "" :
+  `<button data-action="fullscreen" class="${compact ? "fullscreen-button" : "text-button"}" aria-label="${document.fullscreenElement ? "Выйти из полного экрана" : "На весь экран"}">${compact ? "⛶" : document.fullscreenElement ? "⛶ Выйти из полного экрана" : "⛶ На весь экран"}</button>`;
 const smallBrand = `<div class="small-brand">${emblem}<span>СПЕЦДОСТАВКА</span></div>`;
 export function toast(message: string) {
   toastEl.textContent = message;
@@ -215,7 +219,7 @@ function settingsHTML() {
     )
     .join(
       "",
-    )}<p class="fine">Стрелки также работают. Esc — пауза, R — повтор, F2 — отладка.</p>${button("reset-keys", "По умолчанию", "text-button")}</details>${document.fullscreenEnabled ? button("fullscreen", "⛶ Полный экран", "text-button") : ""}</section></div>${button("back", "Готово", "primary")}</div>`;
+    )}<p class="fine">Стрелки также работают. Esc — пауза, R — повтор, F2 — отладка.</p>${button("reset-keys", "По умолчанию", "text-button")}</details>${screenButton()}</section></div>${button("back", "Готово", "primary")}</div>`;
 }
 function introHTML() {
   const page = introPages[introPage];
@@ -243,7 +247,7 @@ function renderUI() {
       ui.innerHTML = `<button class="splash" data-action="splash">${emblem}<strong>СПЕЦДОСТАВКА</strong><span>Люди не должны терять связь</span></button>`;
       break;
     case "menu":
-      ui.innerHTML = `<div class="menu"><header>${smallBrand}</header><div class="menu-copy"><div class="eyebrow"><i></i> ГОРОДСКАЯ ПОЧТА</div><h1>СПЕЦ<br>ДОСТАВКА<span>®</span></h1><p class="tagline">Будущее нуждается в правках.</p><p class="intro-copy">В Малом зале готовятся к концерту.<br>Доставьте расписание, которое остановит шумную линию.</p><nav>${button(save && !save.completed ? "continue" : "start", save ? (save.completed ? "Повторить доставку" : "Продолжить доставку") : "Начать доставку", "primary large")}<div class="menu-secondary">${button("city", "О городе", "text-button")}${button("settings", "Настройки", "text-button")}${button("about", "Об игре", "text-button")}</div></nav><div class="mission-mini"><span>12-Б</span><div><strong>«Перерыв»</strong></div><em>Маршрут<br>3–5 мин</em></div></div><div class="poster" aria-hidden="true"><div class="poster-circle"></div><div class="poster-orbit"></div><img src="${scene.menuBagURL || assetURL("parcel.png")}" alt=""><span class="poster-number">12-Б</span></div><footer><span>ЛЮДИ НЕ ДОЛЖНЫ ТЕРЯТЬ СВЯЗЬ</span></footer></div>`;
+      ui.innerHTML = `<div class="menu"><header>${smallBrand}</header><div class="menu-copy"><div class="eyebrow"><i></i> ГОРОДСКАЯ ПОЧТА</div><h1>СПЕЦ<br>ДОСТАВКА<span>®</span></h1><p class="tagline">Будущее нуждается в правках.</p><p class="intro-copy">В Малом зале готовятся к концерту.<br>Доставьте расписание, которое остановит шумную линию.</p><nav>${button(save && !save.completed ? "continue" : "start", save ? (save.completed ? "Повторить доставку" : "Продолжить доставку") : "Начать доставку", "primary large")}<div class="menu-secondary">${button("city", "О городе", "text-button")}${button("settings", "Настройки", "text-button")}${button("about", "Об игре", "text-button")}</div><div class="screen-options">${screenButton()}</div></nav><div class="mission-mini"><span>12-Б</span><div><strong>«Перерыв»</strong></div><em>Маршрут<br>3–5 мин</em></div></div><div class="poster" aria-hidden="true"><div class="poster-circle"></div><div class="poster-orbit"></div><img src="${scene.menuBagURL || assetURL("parcel.png")}" alt=""><span class="poster-number">12-Б</span></div><footer><span>ЛЮДИ НЕ ДОЛЖНЫ ТЕРЯТЬ СВЯЗЬ</span></footer></div>`;
       if (store.warning) toast(store.warning);
       break;
     case "intro":
@@ -256,18 +260,23 @@ function renderUI() {
       ui.innerHTML = `<div class="brief sheet"><div class="eyebrow">ЗАДАНИЕ КУРЬЕРУ · №12-Б</div><h2>Перерыв для Малого зала</h2><blockquote>«У нас сегодня первый концерт. Автоматика перекрикивает даже пианино. Нам нужны пять минут».<cite>Заявка жителей из Малого зала</cite></blockquote><div class="brief-address"><span>КУДА НЕСТИ</span><strong>Малый зал Главпочтамта</strong><span>ЧТО ВНУТРИ</span><strong>Модуль с новым расписанием</strong></div><p class="brief-task">Установите модуль в приёмный узел у двери зала. Он разрешит остановить объявления и сортировку на пять минут.</p><div class="rule-note"><b>Ⅱ</b><p>Пока идёте, открывайте пломбу ${touchDevice ? "кнопкой" : "клавишей"} <kbd>${controlLabel("seal")}</kbd>. Она останавливает почтовые машины рядом с посылкой. Закроете пломбу, и они продолжат работу.</p></div>${button("accept", "Принять доставку →", "primary")}${button("menu", "В меню", "text-button")}</div>`;
       break;
     case "game":
-      ui.innerHTML = `<div class="hud-top"><div class="hud-parcel"><span class="parcel-number">12-Б</span><div><small>СПЕЦДОСТАВКА</small><strong id="hud-state">ПЛОМБА ЗАКРЫТА</strong></div><span class="seal-state" id="seal-icon">▶</span></div><div class="room-label"><small id="room-number"></small><strong id="room-title"></strong></div><button class="pause-button" data-action="pause" aria-label="Пауза">Ⅱ <span>ESC</span></button></div><div id="chapter-intro"></div><div class="hud-bottom"><div class="hud-info">${controls()}<div id="subtitle" role="status"></div></div><div id="context"></div></div>${touchDevice ? touchControls() : ""}`;
+      ui.innerHTML = `<div class="hud-top"><div class="hud-parcel"><span class="parcel-number">12-Б</span><div><small>СПЕЦДОСТАВКА</small><strong id="hud-state">ПЛОМБА ЗАКРЫТА</strong></div><span class="seal-state" id="seal-icon">▶</span></div><div class="room-label"><small id="room-number"></small><strong id="room-title"></strong></div>${touchDevice ? screenButton(true) : ""}<button class="pause-button" data-action="pause" aria-label="Пауза">Ⅱ <span>ESC</span></button></div><div id="chapter-intro"></div><div class="hud-bottom"><div class="hud-info">${controls()}<div id="subtitle" role="status"></div></div><div id="context"></div></div>${touchDevice ? touchControls() : ""}`;
       updateHUD();
       break;
     case "pause":
     case "pause-ending":
-      ui.innerHTML = `<div class="sheet pause-sheet"><div class="eyebrow">ПОСЫЛКА №12-Б</div><h2>Доставка приостановлена</h2><p>Доставьте новое расписание в Малый зал.<br>Открытая пломба останавливает ближайшие почтовые машины.</p><div class="stack">${button("resume", "Продолжить", "primary")}${button("journal", "Записи о городе")}${mode === "pause" ? button("restart", "Повторить комнату") + button("help", "Помощь") : ""}${button("settings", "Настройки")}${button("menu", "В меню", "text-button")}</div></div>`;
+      ui.innerHTML = `<div class="sheet pause-sheet"><div class="eyebrow">ПОСЫЛКА №12-Б</div><h2>Доставка приостановлена</h2><p>Доставьте новое расписание в Малый зал.<br>Открытая пломба останавливает ближайшие почтовые машины.</p><div class="stack">${button("resume", "Продолжить", "primary")}${button("journal", "Записи о городе")}${mode === "pause" ? button("restart", "Повторить комнату") + button("help", "Помощь") : ""}${button("settings", "Настройки")}${screenButton()}${button("menu", "В меню", "text-button")}</div></div>`;
       break;
     case "restart":
       ui.innerHTML = `<div class="sheet"><div class="eyebrow">БЕЗОПАСНАЯ ТОЧКА</div><h2>Повторить комнату?</h2><p>Герой, посылка и механизмы вернутся к началу текущей комнаты. Предыдущие комнаты уже пройдены.</p>${button("confirm-restart", "Повторить", "primary")}${button("cancel-restart", "Назад", "text-button")}</div>`;
       break;
     case "help":
       ui.innerHTML = `<div class="sheet help-sheet"><div class="eyebrow">ПАМЯТКА КУРЬЕРА</div><h2>Как работает пломба</h2><div class="rule-diagram"><div class="diagram-field"><span>12-Б</span><b>Ⅱ</b><i>Ⅱ</i></div><div class="diagram-lift">↑<small>ДВИЖЕТСЯ</small></div></div><p>${roomTip()}</p><p class="fine">${controlLabel("seal")} — переключить пломбу. ${controlLabel("interact")} — оставить или забрать груз. Поле действует и через стену. Висите на краю? ${controlLabel("jump")} — подняться, ${controlLabel("down")} — отпустить.</p>${button("resume", "Вернуться на маршрут", "primary")}${button("skip", "Пропустить препятствие", "text-button")}<p class="fine">Вы продолжите со следующей комнаты вместе с посылкой.</p></div>`;
+      break;
+    case "fullscreen-help":
+      ui.innerHTML = `<section class="sheet fullscreen-help"><h2>Игра без панелей браузера</h2>${isAppleMobile()
+        ? '<ol><li>В Safari нажмите <strong>«Поделиться»</strong>.</li><li>Выберите <strong>«На экран Домой»</strong>. Если есть переключатель «Открывать как веб-приложение», оставьте его включённым.</li><li>Запустите «Спецдоставку» с появившейся иконки.</li></ol><p>Адресная строка и вкладки Safari исчезнут. Для широкого обзора поверните телефон.</p>'
+        : '<p>Браузер не разрешил полный экран. Попробуйте открыть игру в отдельной вкладке и снова нажать «На весь экран», либо добавьте её на главный экран через меню браузера.</p>'}${button("fullscreen-back", "Понятно", "primary")}</section>`;
       break;
     case "settings":
       ui.innerHTML = settingsHTML();
@@ -459,12 +468,17 @@ ui.addEventListener("click", (event) => {
       store.write("settings", settings);
       renderUI();
       break;
+    case "fullscreen-back":
+      setMode(fullscreenReturn);
+      break;
     case "fullscreen":
-      if (document.fullscreenElement) void document.exitFullscreen();
-      else
-        void document.documentElement
-          .requestFullscreen()
-          .catch(() => toast("Полноэкранный режим недоступен."));
+      touch.clear();
+      void toggleFullscreen().then(opened => {
+        if (opened) return;
+        pause();
+        fullscreenReturn = mode;
+        setMode("fullscreen-help");
+      });
       break;
   }
 });
@@ -480,6 +494,15 @@ ui.addEventListener("input", (event) => {
   }
   store.write("settings", settings);
   sound.apply();
+});
+document.addEventListener("fullscreenchange", () => {
+  touch.clear();
+  if (!document.fullscreenElement) pause();
+  for (const el of Array.from(ui.querySelectorAll<HTMLButtonElement>('[data-action="fullscreen"]'))) {
+    const label = document.fullscreenElement ? "Выйти из полного экрана" : "На весь экран";
+    el.setAttribute("aria-label", label);
+    if (!el.classList.contains("fullscreen-button")) el.textContent = `⛶ ${label}`;
+  }
 });
 window.addEventListener("keydown", (e) => {
   if (binding) {
@@ -523,6 +546,7 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Escape") {
     e.preventDefault();
     if (mode === "intro") { finishIntro(); return; }
+    if (mode === "fullscreen-help") { setMode(fullscreenReturn); return; }
     if (mode === "journal") { setMode(journalReturn); return; }
     if (mode === "game" || mode === "ending") pause();
     else if (mode === "pause") setMode("game");

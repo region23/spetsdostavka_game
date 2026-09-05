@@ -26,26 +26,28 @@ try {
     await page.screenshot({ path: `output/mobile-layout-${width}-${height}-${safe}.png` });
     const canvas = await page.locator("#game canvas").boundingBox();
     console.log({ width, height, safe, canvas });
-    assert.ok(canvas.width >= (width - safe * 2) * 0.98, "The game must fill the available phone width, including with Safari bars open");
+    assert.ok(Math.abs(canvas.x) < 1 && Math.abs(canvas.y) < 1 && Math.abs(canvas.width - width) < 2 && Math.abs(canvas.height - height) < 2, "The canvas must cover the ENTIRE viewport, with no reserved HUD strips");
     const view = await page.evaluate(() => window.__spets?.view);
     if (view) {
       assert.ok(96 * canvas.width / view.width >= 66, "Do not shrink the courier to fit the entire room");
-      assert.ok(view.x >= 0 && view.y >= 0 && view.x + view.width <= 1281 && view.y + view.height <= 641);
+      assert.ok(view.x >= 0 && view.y >= 0 && view.x + view.width <= 1281 && view.y + view.height <= 721);
     }
     const parent = await page.locator("#game").boundingBox();
     assert.ok(Math.abs(canvas.height - parent.height) < 2, "No letterboxing inside the phone stage");
     const footer = await page.locator(".hud-bottom").boundingBox();
-    assert.ok(footer.y >= canvas.y + canvas.height - 1, "Keep text outside the route");
+    assert.ok(footer.y >= 0 && footer.y + footer.height <= height);
     for (const button of await page.locator("[data-control]").all()) {
       const b = await button.boundingBox();
       assert.ok(b.width >= 44 && b.height >= 44);
       assert.ok(b.x >= safe && b.x + b.width <= width - safe + 1 && b.y + b.height <= height);
-      assert.ok(b.y >= canvas.y + canvas.height - 1, "Controls must be below the game");
+      assert.ok(b.y >= canvas.y && b.y + b.height <= canvas.y + canvas.height + 1, "Controls must float INSIDE the canvas");
+      const background = await button.evaluate(el => getComputedStyle(el).backgroundColor);
+      assert.match(background, /^rgba\(/, "Control fill must be translucent");
       assert.ok(b.x + b.width <= footer.x || b.x >= footer.x + footer.width || b.y >= footer.y + footer.height || b.y + b.height <= footer.y, "Controls must not cover text");
     }
     await expect(page.locator("#subtitle")).toBeVisible();
     assert.ok(await page.locator(".hud-info").evaluate(el => el.scrollHeight <= el.clientHeight + 1));
   }
   assert.deepEqual(errors, []);
-  console.log("PASS phone stage fills width with browser bars, safe areas, readable controls and unobscured text");
+  console.log("PASS phone stage fills width and height behind translucent controls, safe areas, readable controls and unobscured text");
 } finally { await browser.close(); }

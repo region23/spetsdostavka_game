@@ -4,7 +4,7 @@ document.body.dataset.touch = String(touchDevice);
 
 const control = (action: TouchAction, icon: string, label: string) =>
   `<button data-control="${action}" aria-label="${label}"><b aria-hidden="true">${icon}</b><span>${label}</span></button>`;
-export const touchControls = () => `<div class="touch-controls" aria-label="Управление курьером"><div class="touch-move">${control("left", "←", "Влево")}${control("right", "→", "Вправо")}</div><div class="touch-actions">${control("down", "↓", "Спуск")}${control("jump", "↑", "Прыжок")}${control("interact", "▣", "Посылка")}${control("seal", "Ⅱ", "Пломба")}</div><p class="rotate-hint">Поверните телефон, чтобы видеть больше маршрута.</p></div>`;
+export const touchControls = () => `<div class="touch-controls" aria-label="Управление курьером"><div class="touch-move">${control("left", "←", "Влево")}${control("right", "→", "Вправо")}</div><div class="touch-actions">${control("down", "↓", "Спуск")}${control("jump", "↑", "Прыжок")}${control("interact", "▣", "Посылка")}${control("seal", "Ⅱ", "Пломба")}</div></div>`;
 
 export class TouchInput {
   private pointers = new Map<number, { action: TouchAction; button: HTMLButtonElement }>();

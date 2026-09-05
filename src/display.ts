@@ -3,7 +3,7 @@ import type * as Phaser from "phaser";
 // Keep simulation coordinates independent of the screen and camera.
 export function installDisplaySizing(scene: Phaser.Scene, touch: boolean) {
   const parent = document.querySelector<HTMLElement>("#game")!;
-  const worldHeight = touch ? 640 : 720;
+  const worldHeight = 720;
   let pixelRatio = window.devicePixelRatio;
   let viewWidth = 1280, viewHeight = worldHeight;
   const resize = () => {
@@ -15,7 +15,7 @@ export function installDisplaySizing(scene: Phaser.Scene, touch: boolean) {
       const density = Math.min(pixelRatio, 2, 1280 / bounds.width, 960 / bounds.height);
       const width = Math.max(1, Math.round(bounds.width * density));
       const height = Math.max(1, Math.round(bounds.height * density));
-      const zoom = Math.max(0.7, bounds.width / 1280, bounds.height / 640) * density;
+      const zoom = Math.max(0.7, bounds.width / 1280, bounds.height / 720) * density;
       scene.scale.getParentBounds();
       scene.scale.setGameSize(width, height);
       scene.cameras.main.setOrigin(0, 0).setZoom(zoom);
@@ -51,7 +51,7 @@ export function installDisplaySizing(scene: Phaser.Scene, touch: boolean) {
     const clamp = (value: number, max: number) => Math.max(0, Math.min(value, max));
     scene.cameras.main.setScroll(
       clamp(x - viewWidth * 0.4, 1280 - viewWidth),
-      clamp(y - viewHeight * 0.8, 640 - viewHeight),
+      clamp(y - viewHeight * 0.8, 720 - viewHeight),
     );
   };
 }
