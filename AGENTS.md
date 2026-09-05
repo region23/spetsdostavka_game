@@ -37,9 +37,13 @@ Name unit tests `*.test.ts` and browser scenarios `browser-*.mjs`. No numeric co
 
 ## Commit & Pull Request Guidelines
 
-This checkout has no Git metadata, so no historical commit convention can be established. Use concise imperative subjects, such as `Fix parcel recovery after falling`.
+The initial commit uses a Conventional Commits prefix. Continue with concise imperative subjects, such as `fix: restore parcel after falling` or `ci: deploy game to Pages`.
 
 PRs should describe the problem, resulting behavior, validation, and relevant limitations. Link applicable issues and include screenshots for visual changes.
+
+## Deployment
+
+Pushes to `main` build and deploy through `.github/workflows/pages.yml`. Use `assetURL()` from `src/assets.ts` for runtime asset paths so repository subpath hosting works.
 
 ## Content & Assets
 

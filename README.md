@@ -18,7 +18,28 @@ npm run build
 npm run preview
 ```
 
-`dist/` — готовая статическая сборка. Размещать на корне сайта через обычный HTTP-сервер. Backend, API-ключи и аккаунты не нужны. Открытие `index.html` через `file://` не поддерживается.
+`dist/` — готовая статическая сборка. Размещать через обычный HTTP-сервер; для подпапки задайте `--base`, как в примере GitHub Pages ниже. Backend, API-ключи и аккаунты не нужны. Открытие `index.html` через `file://` не поддерживается.
+
+## GitHub Pages
+
+Игра: https://region23.github.io/spetsdostavka_game/
+
+Workflow `.github/workflows/pages.yml` запускается при пуше в `main` или вручную через Actions. Он устанавливает зависимости, проверяет тесты и маршрут, собирает игру и публикует `dist/`. В Settings → Pages источником должен быть выбран **GitHub Actions**.
+
+Сборка для этого адреса и локальная проверка:
+
+```sh
+npm run build -- --base /spetsdostavka_game/
+npm run preview -- --base /spetsdostavka_game/ --port 4174 --strictPort
+```
+
+В другом терминале:
+
+```sh
+GAME_URL=http://127.0.0.1:4174/spetsdostavka_game/ node tests/browser-production.mjs
+```
+
+При переименовании репозитория обновите `--base` в workflow. Динамические пути к изображениям используют `assetURL()` из `src/assets.ts`. Backend и секреты для работы игры не требуются; прогресс хранится в браузере. Локальное сохранение не переносится автоматически на опубликованный сайт.
 
 ## Управление
 

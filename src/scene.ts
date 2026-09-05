@@ -1,4 +1,5 @@
 import * as Phaser from "phaser";
+import { assetURL } from "./assets";
 import {
   sim,
   mode,
@@ -40,15 +41,15 @@ export class GameScene extends Phaser.Scene {
   preload() {
     this.load.on("progress", progress);
     this.load.on("loaderror", assetError);
-    this.load.image("hall", "/assets/post-office.png");
-    this.load.image("shaft", "/assets/service-hall.png");
-    this.load.image("club", "/assets/small-hall.png");
+    this.load.image("hall", assetURL("post-office.png"));
+    this.load.image("shaft", assetURL("service-hall.png"));
+    this.load.image("club", assetURL("small-hall.png"));
     this.load.atlas(
       "courier",
-      "/assets/courier-ready.png",
-      "/assets/courier-ready.json",
+      assetURL("courier-ready.png"),
+      assetURL("courier-ready.json"),
     );
-    this.load.image("bag", "/assets/parcel-cutout.png");
+    this.load.image("bag", assetURL("parcel-cutout.png"));
   }
   create() {
     if (
@@ -59,7 +60,7 @@ export class GameScene extends Phaser.Scene {
       assetError();
       return;
     }
-    this.menuBagURL = "/assets/parcel-cutout.png";
+    this.menuBagURL = assetURL("parcel-cutout.png");
     this.bg = this.add
       .image(640, 360, "hall")
       .setDisplaySize(1280, 720)

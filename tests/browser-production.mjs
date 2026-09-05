@@ -9,14 +9,21 @@ const browser = await chromium.launch({
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [];
 page.on("pageerror", (e) => errors.push(e.message));
+page.on("response", response => {
+  if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
+});
 try {
-  await page.goto("http://127.0.0.1:4173/");
+  await page.goto(process.env.GAME_URL || "http://127.0.0.1:4173/");
   await page.locator("[data-action=start]").waitFor();
   assert.equal(await page.evaluate(() => typeof window.__spets), "undefined");
   await page.clock.install();
   await page.locator("[data-action=start]").click();
-  if (await page.locator("[data-action=intro-skip]").isVisible())
-    await page.locator("[data-action=intro-skip]").click();
+  if (await page.locator("[data-action=intro-next]").isVisible()) {
+    for (let i = 0; i < 3; i++) {
+      await page.locator(".intro-art img").evaluate(img => img.decode());
+      await page.locator("[data-action=intro-next]").click();
+    }
+  }
   await page.locator("[data-action=accept]").click();
   for (let i = 0; i < 5; i++) {
     await page.keyboard.press("Escape");
