@@ -667,14 +667,6 @@ if (!supported) {
     banner: false,
     audio: { noAudio: true },
   });
-// The game parent changes size independently of the viewport in the mobile
-// layout. Refresh FIT after CSS and browser toolbars have settled.
-new ResizeObserver(() => {
-  if (scene.scale) {
-    scene.scale.getParentBounds();
-    scene.scale.refresh();
-  }
-}).observe(document.querySelector("#game")!);
 // Read-only diagnostics for reproducible browser checks; no level-skip hooks in production.
 if (import.meta.env.DEV)
   Object.defineProperty(window, "__spets", {

@@ -1,6 +1,8 @@
 import * as Phaser from "phaser";
 import { assetURL } from "./assets";
 import { ParallaxBackdrop } from "./parallax";
+import { installDisplaySizing } from "./display";
+import { touchDevice } from "./touch";
 import {
   sim,
   mode,
@@ -54,6 +56,7 @@ export class GameScene extends Phaser.Scene {
     this.load.image("bag", assetURL("parcel-cutout.webp"));
   }
   create() {
+    installDisplaySizing(this, touchDevice);
     if (
       !["hall", "shaft", "club", "courier", "bag", "city-distance"].every((k) =>
         this.textures.exists(k),
